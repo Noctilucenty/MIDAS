@@ -1,25 +1,15 @@
-# -----------------------------
 # Visual Studio / MSBuild
-# -----------------------------
 .vs/
 **/.vs/
 *.suo
 *.user
-*.userosscache
-*.sln.docstates
-slnx.sqlite
-VSWorkspaceState.json
-
-# IntelliSense / VS databases
 *.VC.db
-*.VC.VC.opendb
 Browse.VC.db
 Solution.VC.db
 *.ipch
 ipch/
-**/ipch/
 
-# Build output folders
+# Build outputs
 Debug/
 Release/
 x64/
@@ -32,35 +22,25 @@ x86/
 # Compiled artifacts
 *.exe
 *.dll
-*.lib
-*.a
-*.o
-*.obj
 *.pdb
 *.ilk
 *.idb
-*.log
+*.obj
 *.tlog
-*.lastbuildstate
+*.log
 *.recipe
-*.manifest
 *.FileListAbsolute.txt
-*.cache
-*.db
 *.sqlite
+*.db
 *.vsidx
 
-# -----------------------------
 # Python
-# -----------------------------
 __pycache__/
 *.pyc
 .venv/
 venv/
 
-# -----------------------------
-# Datasets / large files
-# -----------------------------
+# Large data (adjust as needed)
 dataset/
 datasets/
 data/
