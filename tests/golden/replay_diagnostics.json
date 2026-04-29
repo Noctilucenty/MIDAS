@@ -1,0 +1,14 @@
+{
+  "mode": "candles",
+  "processed_steps": 8,
+  "processed_candles": 8,
+  "processed_events": 0,
+  "quote_events": 0,
+  "bbo_events": 0,
+  "trade_events": 0,
+  "funding_events": 0,
+  "depth_events": 0,
+  "candle_events": 0,
+  "reordered_events": 0,
+  "last_sequence": null
+}

@@ -1,0 +1,47 @@
+{
+  "context": {
+    "symbol": "BTCUSDT-PERP",
+    "venue": "sample_event_vendor",
+    "timeframe": "event",
+    "run_label": "event_replay_demo"
+  },
+  "market_data": {
+    "kind": "event_json",
+    "path": "examples/data/btc_perp_events.json"
+  },
+  "strategy": {
+    "kind": "signal_csv",
+    "path": "examples/data/event_signals.csv"
+  },
+  "backtest_config": {
+    "starting_cash": 10000.0,
+    "default_leverage": 1.5,
+    "max_leverage": 3.0,
+    "position_sizing": {
+      "kind": "fixed_notional",
+      "notional": 2500.0
+    },
+    "allow_long": true,
+    "allow_short": true
+  },
+  "execution_config": {
+    "taker_fee_bps": 5.0,
+    "maker_fee_bps": 2.0,
+    "spread_bps": 2.0,
+    "slippage_bps": 1.5,
+    "latency_bars": 0,
+    "latency_events": 1,
+    "order_timeout_bars": null,
+    "order_timeout_events": 3,
+    "order_type": "limit",
+    "market_price_reference": "opposing_best",
+    "limit_fill_assumption": "touch",
+    "use_candle_spread": false,
+    "partial_fill_ratio": 1.0,
+    "liquidation": {
+      "maintenance_margin_ratio": 0.01,
+      "liquidation_fee_bps": 10.0,
+      "use_adverse_price_path": true
+    }
+  }
+}

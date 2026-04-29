@@ -1,0 +1,48 @@
+{
+  "context": {
+    "symbol": "BTCUSDT-PERP",
+    "venue": "sample_vendor",
+    "timeframe": "1h",
+    "run_label": "ma_mvp_demo"
+  },
+  "market_data": {
+    "kind": "ohlcv_csv",
+    "path": "examples/data/btc_perp_1h.csv"
+  },
+  "strategy": {
+    "kind": "moving_average_cross",
+    "fast_window": 3,
+    "slow_window": 5
+  },
+  "backtest_config": {
+    "starting_cash": 10000.0,
+    "default_leverage": 2.0,
+    "max_leverage": 3.0,
+    "position_sizing": {
+      "kind": "percent_of_equity",
+      "fraction": 0.5
+    },
+    "allow_long": true,
+    "allow_short": true
+  },
+  "execution_config": {
+    "taker_fee_bps": 5.0,
+    "maker_fee_bps": 2.0,
+    "spread_bps": 2.5,
+    "slippage_bps": 4.0,
+    "latency_bars": 0,
+    "latency_events": 0,
+    "order_timeout_bars": null,
+    "order_timeout_events": null,
+    "order_type": "market",
+    "market_price_reference": "mid",
+    "limit_fill_assumption": "touch",
+    "use_candle_spread": true,
+    "partial_fill_ratio": null,
+    "liquidation": {
+      "maintenance_margin_ratio": 0.01,
+      "liquidation_fee_bps": 10.0,
+      "use_adverse_price_path": true
+    }
+  }
+}

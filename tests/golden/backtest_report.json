@@ -1,0 +1,726 @@
+{
+  "metadata": {
+    "engine_version": "0.1.0",
+    "artifact_schema_version": "2.0.0",
+    "run_signature": "d5d6c577bc530f3ff3b5187bbba42eb1d3e418f1193d6b7ca65122c759462f2f",
+    "deterministic_seed": 7
+  },
+  "manifest": {
+    "engine_version": "0.1.0",
+    "artifact_schema_version": "2.0.0",
+    "request_signature": "d5d6c577bc530f3ff3b5187bbba42eb1d3e418f1193d6b7ca65122c759462f2f",
+    "data_mode": "candles",
+    "dataset_length": 8,
+    "range_start": "2024-01-01T00:00:00Z",
+    "range_end": "2024-01-01T07:00:00Z",
+    "input_summary": {
+      "data_mode": "candles",
+      "strategy_kind": "signal_stream",
+      "symbol": "BTC-PERP",
+      "timeframe": "1h"
+    },
+    "assumption_summary": {
+      "latency_bars": "0",
+      "latency_events": "0",
+      "limit_fill_assumption": "Touch",
+      "market_price_reference": "OpposingBest",
+      "order_type": "Market",
+      "replay_mode": "candles",
+      "validation_philosophy": "survive_reality_not_just_profit"
+    }
+  },
+  "context": {
+    "symbol": "BTC-PERP",
+    "venue": "test",
+    "timeframe": "1h",
+    "run_label": "test"
+  },
+  "backtest_config": {
+    "starting_cash": 1000.0,
+    "default_leverage": 1.5,
+    "max_leverage": 3.0,
+    "position_sizing": {
+      "kind": "fixed_notional",
+      "notional": 300.0
+    },
+    "allow_long": true,
+    "allow_short": true
+  },
+  "execution_config": {
+    "taker_fee_bps": 5.0,
+    "maker_fee_bps": 2.0,
+    "spread_bps": 2.0,
+    "slippage_bps": 1.0,
+    "latency_bars": 0,
+    "latency_events": 0,
+    "order_timeout_bars": 1,
+    "order_timeout_events": 1,
+    "order_type": "market",
+    "market_price_reference": "opposing_best",
+    "limit_fill_assumption": "touch",
+    "use_candle_spread": true,
+    "partial_fill_ratio": null,
+    "liquidation": {
+      "maintenance_margin_ratio": 0.005,
+      "liquidation_fee_bps": 10.0,
+      "use_adverse_price_path": true
+    }
+  },
+  "strategy_input": {
+    "kind": "signal_stream",
+    "data": [
+      {
+        "timestamp": "2024-01-01T00:00:00Z",
+        "action": "go_long",
+        "leverage_override": 1.0,
+        "limit_price": null,
+        "note": "golden_long"
+      },
+      {
+        "timestamp": "2024-01-01T02:00:00Z",
+        "action": "go_short",
+        "leverage_override": 1.0,
+        "limit_price": null,
+        "note": "golden_flip"
+      }
+    ]
+  },
+  "metrics": {
+    "total_return": -0.006531739684706395,
+    "net_pnl": -6.531739684706395,
+    "gross_pnl": -5.953409593386541,
+    "sharpe_ratio": -25.487296944664436,
+    "max_drawdown": 12.420730194174666,
+    "max_drawdown_pct": 0.012348012863610074,
+    "win_rate": 0.5,
+    "profit_factor": 0.45786484802231187,
+    "average_win": 5.516436237623749,
+    "average_loss": -12.0481759223301,
+    "trade_count": 2,
+    "exposure_time_pct": 0.875,
+    "average_trade_duration_seconds": 10800.0,
+    "funding_cost_impact": -0.03046601941747573,
+    "fee_impact": 0.6087961107372872,
+    "slippage_impact": 0.12175922214745746,
+    "spread_impact": 0.12175922214745746,
+    "ending_equity": 993.4682603152936
+  },
+  "artifacts": {
+    "equity_curve": [
+      {
+        "timestamp": "2024-01-01T00:00:00Z",
+        "equity": 1000.0,
+        "cash": 1000.0,
+        "unrealized_pnl": 0.0,
+        "position_state": "flat"
+      },
+      {
+        "timestamp": "2024-01-01T01:00:00Z",
+        "equity": 999.1959105940593,
+        "cash": 999.84997,
+        "unrealized_pnl": -0.6540594059406104,
+        "position_state": "long"
+      },
+      {
+        "timestamp": "2024-01-01T02:00:00Z",
+        "equity": 1004.5424452475247,
+        "cash": 999.84997,
+        "unrealized_pnl": 4.692475247524728,
+        "position_state": "long"
+      },
+      {
+        "timestamp": "2024-01-01T03:00:00Z",
+        "equity": 1005.8889905094683,
+        "cash": 1005.3664662376236,
+        "unrealized_pnl": 0.5225242718446634,
+        "position_state": "short"
+      },
+      {
+        "timestamp": "2024-01-01T04:00:00Z",
+        "equity": 1000.6767380822839,
+        "cash": 1005.3969322570412,
+        "unrealized_pnl": -4.72019417475727,
+        "position_state": "short"
+      },
+      {
+        "timestamp": "2024-01-01T05:00:00Z",
+        "equity": 1000.0942138104392,
+        "cash": 1005.3969322570412,
+        "unrealized_pnl": -5.302718446601938,
+        "position_state": "short"
+      },
+      {
+        "timestamp": "2024-01-01T06:00:00Z",
+        "equity": 994.8514953638373,
+        "cash": 1005.3969322570412,
+        "unrealized_pnl": -10.545436893203872,
+        "position_state": "short"
+      },
+      {
+        "timestamp": "2024-01-01T07:00:00Z",
+        "equity": 993.4682603152936,
+        "cash": 993.4682603152936,
+        "unrealized_pnl": 0.0,
+        "position_state": "flat"
+      }
+    ],
+    "drawdown_curve": [
+      {
+        "timestamp": "2024-01-01T00:00:00Z",
+        "equity": 1000.0,
+        "peak_equity": 1000.0,
+        "drawdown": 0.0,
+        "drawdown_pct": 0.0
+      },
+      {
+        "timestamp": "2024-01-01T01:00:00Z",
+        "equity": 999.1959105940593,
+        "peak_equity": 1000.0,
+        "drawdown": 0.8040894059406583,
+        "drawdown_pct": 0.0008040894059406583
+      },
+      {
+        "timestamp": "2024-01-01T02:00:00Z",
+        "equity": 1004.5424452475247,
+        "peak_equity": 1004.5424452475247,
+        "drawdown": 0.0,
+        "drawdown_pct": 0.0
+      },
+      {
+        "timestamp": "2024-01-01T03:00:00Z",
+        "equity": 1005.8889905094683,
+        "peak_equity": 1005.8889905094683,
+        "drawdown": 0.0,
+        "drawdown_pct": 0.0
+      },
+      {
+        "timestamp": "2024-01-01T04:00:00Z",
+        "equity": 1000.6767380822839,
+        "peak_equity": 1005.8889905094683,
+        "drawdown": 5.212252427184353,
+        "drawdown_pct": 0.00518173722583883
+      },
+      {
+        "timestamp": "2024-01-01T05:00:00Z",
+        "equity": 1000.0942138104392,
+        "peak_equity": 1005.8889905094683,
+        "drawdown": 5.7947766990290575,
+        "drawdown_pct": 0.005760851101565478
+      },
+      {
+        "timestamp": "2024-01-01T06:00:00Z",
+        "equity": 994.8514953638373,
+        "peak_equity": 1005.8889905094683,
+        "drawdown": 11.037495145630942,
+        "drawdown_pct": 0.010972875983104865
+      },
+      {
+        "timestamp": "2024-01-01T07:00:00Z",
+        "equity": 993.4682603152936,
+        "peak_equity": 1005.8889905094683,
+        "drawdown": 12.420730194174666,
+        "drawdown_pct": 0.012348012863610074
+      }
+    ],
+    "trade_log": [
+      {
+        "entry_time": "2024-01-01T01:00:00Z",
+        "exit_time": "2024-01-01T03:00:00Z",
+        "side": "long",
+        "quantity": 2.9702970297029703,
+        "leverage": 1.0,
+        "entry_price": 101.0202,
+        "exit_price": 102.9794,
+        "gross_pnl": 5.819405940594046,
+        "net_pnl": 5.516436237623749,
+        "fees_paid": 0.302969702970297,
+        "funding_paid": 0.0,
+        "slippage_paid": 0.060593940594059405,
+        "spread_paid": 0.060593940594059405,
+        "duration_seconds": 7200,
+        "liquidated": false,
+        "entry_note": null,
+        "exit_note": "golden_flip"
+      },
+      {
+        "entry_time": "2024-01-01T03:00:00Z",
+        "exit_time": "2024-01-01T07:00:00Z",
+        "side": "short",
+        "quantity": 2.912621359223301,
+        "leverage": 1.0,
+        "entry_price": 102.9794,
+        "exit_price": 107.0214,
+        "gross_pnl": -11.772815533980587,
+        "net_pnl": -12.0481759223301,
+        "fees_paid": 0.30582640776699027,
+        "funding_paid": -0.03046601941747573,
+        "slippage_paid": 0.06116528155339806,
+        "spread_paid": 0.06116528155339806,
+        "duration_seconds": 14400,
+        "liquidated": false,
+        "entry_note": null,
+        "exit_note": "end_of_backtest"
+      }
+    ],
+    "fills": [
+      {
+        "order_id": 1,
+        "submitted_at": "2024-01-01T00:00:00Z",
+        "timestamp": "2024-01-01T01:00:00Z",
+        "trigger_sequence": null,
+        "kind": "market",
+        "side": "long",
+        "quantity": 2.9702970297029703,
+        "reference_price": 101.0,
+        "realized_execution_price": 101.0202,
+        "fee_paid": 0.15003,
+        "spread_cost": 0.030006,
+        "slippage_cost": 0.030006,
+        "liquidation": false,
+        "maker": false,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "note": "open: golden_long"
+      },
+      {
+        "order_id": 2,
+        "submitted_at": "2024-01-01T02:00:00Z",
+        "timestamp": "2024-01-01T03:00:00Z",
+        "trigger_sequence": null,
+        "kind": "market",
+        "side": "short",
+        "quantity": 2.9702970297029703,
+        "reference_price": 103.0,
+        "realized_execution_price": 102.9794,
+        "fee_paid": 0.15293970297029702,
+        "spread_cost": 0.030587940594059403,
+        "slippage_cost": 0.030587940594059403,
+        "liquidation": false,
+        "maker": false,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "note": "close: golden_flip"
+      },
+      {
+        "order_id": 2,
+        "submitted_at": "2024-01-01T02:00:00Z",
+        "timestamp": "2024-01-01T03:00:00Z",
+        "trigger_sequence": null,
+        "kind": "market",
+        "side": "short",
+        "quantity": 2.912621359223301,
+        "reference_price": 103.0,
+        "realized_execution_price": 102.9794,
+        "fee_paid": 0.14997,
+        "spread_cost": 0.029994,
+        "slippage_cost": 0.029994,
+        "liquidation": false,
+        "maker": false,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "note": "open: golden_flip"
+      },
+      {
+        "order_id": 3,
+        "submitted_at": "2024-01-01T07:00:00Z",
+        "timestamp": "2024-01-01T07:00:00Z",
+        "trigger_sequence": null,
+        "kind": "market",
+        "side": "long",
+        "quantity": 2.912621359223301,
+        "reference_price": 107.0,
+        "realized_execution_price": 107.0214,
+        "fee_paid": 0.15585640776699028,
+        "spread_cost": 0.03117128155339806,
+        "slippage_cost": 0.03117128155339806,
+        "liquidation": false,
+        "maker": false,
+        "fill_delay_steps": 0,
+        "fill_delay_seconds": 0,
+        "note": "close: end_of_backtest"
+      }
+    ],
+    "order_audit_log": [
+      {
+        "order_id": 1,
+        "generated_at": "2024-01-01T00:00:00Z",
+        "completed_at": null,
+        "trigger_sequence": null,
+        "action": "go_long",
+        "requested_kind": "market",
+        "realized_kind": null,
+        "status": "submitted",
+        "limit_price": null,
+        "fill_price": null,
+        "quantity": null,
+        "maker": null,
+        "fill_delay_steps": null,
+        "fill_delay_seconds": null,
+        "execution_leg_count": null,
+        "position_before": "flat",
+        "position_after": null,
+        "reason_code": "submitted",
+        "reason": "golden_long"
+      },
+      {
+        "order_id": 1,
+        "generated_at": "2024-01-01T00:00:00Z",
+        "completed_at": "2024-01-01T01:00:00Z",
+        "trigger_sequence": null,
+        "action": "go_long",
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "status": "filled",
+        "limit_price": null,
+        "fill_price": 101.0202,
+        "quantity": 2.9702970297029703,
+        "maker": false,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "execution_leg_count": 1,
+        "position_before": "flat",
+        "position_after": "long",
+        "reason_code": "filled",
+        "reason": "golden_long"
+      },
+      {
+        "order_id": 2,
+        "generated_at": "2024-01-01T02:00:00Z",
+        "completed_at": null,
+        "trigger_sequence": null,
+        "action": "go_short",
+        "requested_kind": "market",
+        "realized_kind": null,
+        "status": "submitted",
+        "limit_price": null,
+        "fill_price": null,
+        "quantity": null,
+        "maker": null,
+        "fill_delay_steps": null,
+        "fill_delay_seconds": null,
+        "execution_leg_count": null,
+        "position_before": "long",
+        "position_after": null,
+        "reason_code": "submitted",
+        "reason": "golden_flip"
+      },
+      {
+        "order_id": 2,
+        "generated_at": "2024-01-01T02:00:00Z",
+        "completed_at": "2024-01-01T03:00:00Z",
+        "trigger_sequence": null,
+        "action": "go_short",
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "status": "filled",
+        "limit_price": null,
+        "fill_price": null,
+        "quantity": null,
+        "maker": null,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "execution_leg_count": 2,
+        "position_before": "long",
+        "position_after": "short",
+        "reason_code": "position_flip",
+        "reason": "golden_flip"
+      },
+      {
+        "order_id": 3,
+        "generated_at": "2024-01-01T07:00:00Z",
+        "completed_at": null,
+        "trigger_sequence": null,
+        "action": "exit_to_flat",
+        "requested_kind": "market",
+        "realized_kind": null,
+        "status": "submitted",
+        "limit_price": null,
+        "fill_price": null,
+        "quantity": null,
+        "maker": null,
+        "fill_delay_steps": null,
+        "fill_delay_seconds": null,
+        "execution_leg_count": null,
+        "position_before": "short",
+        "position_after": null,
+        "reason_code": "submitted",
+        "reason": "end_of_backtest"
+      },
+      {
+        "order_id": 3,
+        "generated_at": "2024-01-01T07:00:00Z",
+        "completed_at": "2024-01-01T07:00:00Z",
+        "trigger_sequence": null,
+        "action": "exit_to_flat",
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "status": "filled",
+        "limit_price": null,
+        "fill_price": 107.0214,
+        "quantity": 2.912621359223301,
+        "maker": false,
+        "fill_delay_steps": 0,
+        "fill_delay_seconds": 0,
+        "execution_leg_count": 1,
+        "position_before": "short",
+        "position_after": "flat",
+        "reason_code": "filled",
+        "reason": "end_of_backtest"
+      }
+    ],
+    "execution_legs": [
+      {
+        "order_id": 1,
+        "leg_index": 1,
+        "role": "open",
+        "generated_at": "2024-01-01T00:00:00Z",
+        "executed_at": "2024-01-01T01:00:00Z",
+        "trigger_sequence": null,
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "side": "long",
+        "quantity": 2.9702970297029703,
+        "reference_price": 101.0,
+        "realized_execution_price": 101.0202,
+        "maker": false,
+        "fee_paid": 0.15003,
+        "spread_cost": 0.030006,
+        "slippage_cost": 0.030006,
+        "funding_cost": 0.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "position_before": "flat",
+        "position_after": "long",
+        "liquidation": false,
+        "reason_code": "position_open",
+        "reason": "golden_long"
+      },
+      {
+        "order_id": 2,
+        "leg_index": 1,
+        "role": "close",
+        "generated_at": "2024-01-01T02:00:00Z",
+        "executed_at": "2024-01-01T03:00:00Z",
+        "trigger_sequence": null,
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "side": "short",
+        "quantity": 2.9702970297029703,
+        "reference_price": 103.0,
+        "realized_execution_price": 102.9794,
+        "maker": false,
+        "fee_paid": 0.15293970297029702,
+        "spread_cost": 0.030587940594059403,
+        "slippage_cost": 0.030587940594059403,
+        "funding_cost": 0.0,
+        "gross_pnl": 5.819405940594046,
+        "net_pnl": 5.516436237623749,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "position_before": "long",
+        "position_after": "flat",
+        "liquidation": false,
+        "reason_code": "position_flip_close",
+        "reason": "golden_flip"
+      },
+      {
+        "order_id": 2,
+        "leg_index": 2,
+        "role": "open",
+        "generated_at": "2024-01-01T02:00:00Z",
+        "executed_at": "2024-01-01T03:00:00Z",
+        "trigger_sequence": null,
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "side": "short",
+        "quantity": 2.912621359223301,
+        "reference_price": 103.0,
+        "realized_execution_price": 102.9794,
+        "maker": false,
+        "fee_paid": 0.14997,
+        "spread_cost": 0.029994,
+        "slippage_cost": 0.029994,
+        "funding_cost": 0.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "fill_delay_steps": 1,
+        "fill_delay_seconds": 3600,
+        "position_before": "flat",
+        "position_after": "short",
+        "liquidation": false,
+        "reason_code": "position_flip_open",
+        "reason": "golden_flip"
+      },
+      {
+        "order_id": 3,
+        "leg_index": 1,
+        "role": "close",
+        "generated_at": "2024-01-01T07:00:00Z",
+        "executed_at": "2024-01-01T07:00:00Z",
+        "trigger_sequence": null,
+        "requested_kind": "market",
+        "realized_kind": "market",
+        "side": "long",
+        "quantity": 2.912621359223301,
+        "reference_price": 107.0,
+        "realized_execution_price": 107.0214,
+        "maker": false,
+        "fee_paid": 0.15585640776699028,
+        "spread_cost": 0.03117128155339806,
+        "slippage_cost": 0.03117128155339806,
+        "funding_cost": -0.03046601941747573,
+        "gross_pnl": -11.772815533980587,
+        "net_pnl": -12.0481759223301,
+        "fill_delay_steps": 0,
+        "fill_delay_seconds": 0,
+        "position_before": "short",
+        "position_after": "flat",
+        "liquidation": false,
+        "reason_code": "position_close",
+        "reason": "end_of_backtest"
+      }
+    ],
+    "execution_diagnostics": {
+      "submitted_orders": 3,
+      "filled_orders": 3,
+      "cancelled_orders": 0,
+      "expired_orders": 0,
+      "rejected_orders": 0,
+      "market_fills": 3,
+      "maker_limit_fills": 0,
+      "taker_limit_fills": 0,
+      "open_legs": 2,
+      "close_legs": 2,
+      "liquidation_legs": 0,
+      "flip_orders": 1,
+      "liquidation_count": 0,
+      "funding_events_applied": 1,
+      "average_fill_delay_steps": 0.6666666666666666,
+      "average_fill_delay_seconds": 2400.0,
+      "total_fee_paid": 0.6087961107372872,
+      "total_spread_cost": 0.12175922214745746,
+      "total_slippage_cost": 0.12175922214745746,
+      "total_funding_cost": -0.03046601941747573,
+      "total_liquidation_fees": 0.0,
+      "reason_counts": {
+        "filled": 2,
+        "position_flip": 1
+      },
+      "notes": []
+    },
+    "replay_diagnostics": {
+      "mode": "candles",
+      "processed_steps": 8,
+      "processed_candles": 8,
+      "processed_events": 0,
+      "quote_events": 0,
+      "bbo_events": 0,
+      "trade_events": 0,
+      "funding_events": 0,
+      "depth_events": 0,
+      "candle_events": 0,
+      "reordered_events": 0,
+      "last_sequence": null
+    },
+    "consistency_report": {
+      "checks": [
+        {
+          "name": "equity_points_reconcile",
+          "passed": true,
+          "detail": "each equity point must equal cash plus unrealized pnl"
+        },
+        {
+          "name": "flat_points_have_zero_unrealized",
+          "passed": true,
+          "detail": "flat equity points must not carry unrealized pnl"
+        },
+        {
+          "name": "drawdown_points_non_negative",
+          "passed": true,
+          "detail": "drawdown values must be non-negative distances from peak equity"
+        },
+        {
+          "name": "drawdown_points_match_running_peak",
+          "passed": true,
+          "detail": "drawdown peak equity must be monotonic and above current equity"
+        },
+        {
+          "name": "trade_count_matches_metrics",
+          "passed": true,
+          "detail": "metrics trade_count=2 but trade_log has 2 entries"
+        },
+        {
+          "name": "ending_equity_matches_last_point",
+          "passed": true,
+          "detail": "metrics ending_equity=993.4682603152936 but last equity point=993.4682603152936"
+        },
+        {
+          "name": "net_pnl_matches_start_to_end_equity",
+          "passed": true,
+          "detail": "metrics net_pnl=-6.531739684706395 but ending_equity-starting_cash=-6.531739684706395"
+        },
+        {
+          "name": "fee_impact_reconciles",
+          "passed": true,
+          "detail": "state fee_impact=0.6087961107372872 but trades + open carry=0.6087961107372872"
+        },
+        {
+          "name": "funding_impact_reconciles",
+          "passed": true,
+          "detail": "state funding_impact=-0.03046601941747573 but trades + open carry=-0.03046601941747573"
+        },
+        {
+          "name": "slippage_impact_reconciles",
+          "passed": true,
+          "detail": "state slippage_impact=0.12175922214745746 but trades + open carry=0.12175922214745746"
+        },
+        {
+          "name": "spread_impact_reconciles",
+          "passed": true,
+          "detail": "state spread_impact=0.12175922214745746 but trades + open carry=0.12175922214745746"
+        },
+        {
+          "name": "diagnostic_costs_match_metrics",
+          "passed": true,
+          "detail": "metrics cost attribution fields must match state totals"
+        },
+        {
+          "name": "execution_legs_match_fills",
+          "passed": true,
+          "detail": "execution legs must line up one-for-one with fills"
+        },
+        {
+          "name": "close_legs_match_closed_trades",
+          "passed": true,
+          "detail": "every closed trade must map to exactly one close or liquidation leg"
+        },
+        {
+          "name": "order_lifecycle_entries_are_legal",
+          "passed": true,
+          "detail": "each non-liquidation order must begin with submitted and end in a single terminal state"
+        },
+        {
+          "name": "final_position_matches_last_equity_state",
+          "passed": true,
+          "detail": "final position state must match the last equity point"
+        },
+        {
+          "name": "final_drawdown_matches_last_equity",
+          "passed": true,
+          "detail": "last drawdown point must reconcile with the last equity point"
+        }
+      ]
+    },
+    "assumptions": {
+      "latency_bars": "0",
+      "latency_events": "0",
+      "limit_fill_assumption": "Touch",
+      "market_price_reference": "OpposingBest",
+      "order_type": "Market",
+      "replay_mode": "candles",
+      "validation_philosophy": "survive_reality_not_just_profit"
+    }
+  }
+}

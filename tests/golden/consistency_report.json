@@ -1,0 +1,89 @@
+{
+  "checks": [
+    {
+      "name": "equity_points_reconcile",
+      "passed": true,
+      "detail": "each equity point must equal cash plus unrealized pnl"
+    },
+    {
+      "name": "flat_points_have_zero_unrealized",
+      "passed": true,
+      "detail": "flat equity points must not carry unrealized pnl"
+    },
+    {
+      "name": "drawdown_points_non_negative",
+      "passed": true,
+      "detail": "drawdown values must be non-negative distances from peak equity"
+    },
+    {
+      "name": "drawdown_points_match_running_peak",
+      "passed": true,
+      "detail": "drawdown peak equity must be monotonic and above current equity"
+    },
+    {
+      "name": "trade_count_matches_metrics",
+      "passed": true,
+      "detail": "metrics trade_count=2 but trade_log has 2 entries"
+    },
+    {
+      "name": "ending_equity_matches_last_point",
+      "passed": true,
+      "detail": "metrics ending_equity=993.4682603152936 but last equity point=993.4682603152936"
+    },
+    {
+      "name": "net_pnl_matches_start_to_end_equity",
+      "passed": true,
+      "detail": "metrics net_pnl=-6.531739684706395 but ending_equity-starting_cash=-6.531739684706395"
+    },
+    {
+      "name": "fee_impact_reconciles",
+      "passed": true,
+      "detail": "state fee_impact=0.6087961107372872 but trades + open carry=0.6087961107372872"
+    },
+    {
+      "name": "funding_impact_reconciles",
+      "passed": true,
+      "detail": "state funding_impact=-0.03046601941747573 but trades + open carry=-0.03046601941747573"
+    },
+    {
+      "name": "slippage_impact_reconciles",
+      "passed": true,
+      "detail": "state slippage_impact=0.12175922214745746 but trades + open carry=0.12175922214745746"
+    },
+    {
+      "name": "spread_impact_reconciles",
+      "passed": true,
+      "detail": "state spread_impact=0.12175922214745746 but trades + open carry=0.12175922214745746"
+    },
+    {
+      "name": "diagnostic_costs_match_metrics",
+      "passed": true,
+      "detail": "metrics cost attribution fields must match state totals"
+    },
+    {
+      "name": "execution_legs_match_fills",
+      "passed": true,
+      "detail": "execution legs must line up one-for-one with fills"
+    },
+    {
+      "name": "close_legs_match_closed_trades",
+      "passed": true,
+      "detail": "every closed trade must map to exactly one close or liquidation leg"
+    },
+    {
+      "name": "order_lifecycle_entries_are_legal",
+      "passed": true,
+      "detail": "each non-liquidation order must begin with submitted and end in a single terminal state"
+    },
+    {
+      "name": "final_position_matches_last_equity_state",
+      "passed": true,
+      "detail": "final position state must match the last equity point"
+    },
+    {
+      "name": "final_drawdown_matches_last_equity",
+      "passed": true,
+      "detail": "last drawdown point must reconcile with the last equity point"
+    }
+  ]
+}

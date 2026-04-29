@@ -1,0 +1,24 @@
+{
+  "engine_version": "0.1.0",
+  "artifact_schema_version": "2.0.0",
+  "request_signature": "d5d6c577bc530f3ff3b5187bbba42eb1d3e418f1193d6b7ca65122c759462f2f",
+  "data_mode": "candles",
+  "dataset_length": 8,
+  "range_start": "2024-01-01T00:00:00Z",
+  "range_end": "2024-01-01T07:00:00Z",
+  "input_summary": {
+    "data_mode": "candles",
+    "strategy_kind": "signal_stream",
+    "symbol": "BTC-PERP",
+    "timeframe": "1h"
+  },
+  "assumption_summary": {
+    "latency_bars": "0",
+    "latency_events": "0",
+    "limit_fill_assumption": "Touch",
+    "market_price_reference": "OpposingBest",
+    "order_type": "Market",
+    "replay_mode": "candles",
+    "validation_philosophy": "survive_reality_not_just_profit"
+  }
+}

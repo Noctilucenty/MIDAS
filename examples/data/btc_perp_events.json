@@ -1,0 +1,122 @@
+[
+  {
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sequence": 1,
+    "kind": "quote",
+    "bid": 100.0,
+    "ask": 100.2,
+    "bid_size": 5.0,
+    "ask_size": 4.0
+  },
+  {
+    "timestamp": "2024-01-01T00:00:01Z",
+    "sequence": 2,
+    "kind": "depth",
+    "side": "long",
+    "price": 100.0,
+    "quantity": 5.0,
+    "level": 1,
+    "action": "snapshot"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:01Z",
+    "sequence": 3,
+    "kind": "depth",
+    "side": "short",
+    "price": 100.2,
+    "quantity": 4.0,
+    "level": 1,
+    "action": "snapshot"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:02Z",
+    "sequence": 4,
+    "kind": "trade",
+    "price": 100.18,
+    "quantity": 0.8,
+    "aggressor": "long"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:04Z",
+    "sequence": 5,
+    "kind": "trade",
+    "price": 100.14,
+    "quantity": 1.0,
+    "aggressor": "short"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:05Z",
+    "sequence": 6,
+    "kind": "quote",
+    "bid": 100.3,
+    "ask": 100.5,
+    "bid_size": 4.5,
+    "ask_size": 4.2
+  },
+  {
+    "timestamp": "2024-01-01T00:00:06Z",
+    "sequence": 7,
+    "kind": "funding",
+    "rate": 0.0001
+  },
+  {
+    "timestamp": "2024-01-01T00:00:07Z",
+    "sequence": 8,
+    "kind": "trade",
+    "price": 100.48,
+    "quantity": 1.1,
+    "aggressor": "long"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:08Z",
+    "sequence": 9,
+    "kind": "quote",
+    "bid": 100.75,
+    "ask": 100.95,
+    "bid_size": 6.0,
+    "ask_size": 4.0
+  },
+  {
+    "timestamp": "2024-01-01T00:00:09Z",
+    "sequence": 10,
+    "kind": "bbo",
+    "bid": 100.72,
+    "ask": 100.92,
+    "bid_size": 5.5,
+    "ask_size": 4.1
+  },
+  {
+    "timestamp": "2024-01-01T00:00:10Z",
+    "sequence": 11,
+    "kind": "trade",
+    "price": 100.9,
+    "quantity": 0.9,
+    "aggressor": "long"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:11Z",
+    "sequence": 12,
+    "kind": "quote",
+    "bid": 100.4,
+    "ask": 100.6,
+    "bid_size": 4.2,
+    "ask_size": 4.2
+  },
+  {
+    "timestamp": "2024-01-01T00:00:12Z",
+    "sequence": 13,
+    "kind": "trade",
+    "price": 100.35,
+    "quantity": 1.2,
+    "aggressor": "short"
+  },
+  {
+    "timestamp": "2024-01-01T00:00:13Z",
+    "sequence": 14,
+    "kind": "quote",
+    "bid": 100.1,
+    "ask": 100.3,
+    "bid_size": 4.8,
+    "ask_size": 4.6
+  }
+]

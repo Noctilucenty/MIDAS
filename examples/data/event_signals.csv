@@ -1,0 +1,4 @@
+timestamp,action,leverage_override,limit_price,note
+2024-01-01T00:00:00Z,go_long,1.5,100.15,event_limit_entry
+2024-01-01T00:00:06Z,go_short,1.5,100.90,event_limit_flip
+2024-01-01T00:00:11Z,exit_to_flat,1.5,100.30,event_limit_exit

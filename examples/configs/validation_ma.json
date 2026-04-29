@@ -1,0 +1,110 @@
+{
+  "backtest": {
+    "context": {
+      "symbol": "BTCUSDT-PERP",
+      "venue": "sample_vendor",
+      "timeframe": "1h",
+      "run_label": "validation_demo"
+    },
+    "market_data": {
+      "kind": "ohlcv_csv",
+      "path": "examples/data/btc_perp_1h.csv"
+    },
+    "strategy": {
+      "kind": "moving_average_cross",
+      "fast_window": 3,
+      "slow_window": 5
+    },
+    "backtest_config": {
+      "starting_cash": 10000.0,
+      "default_leverage": 2.0,
+      "max_leverage": 3.0,
+      "position_sizing": {
+        "kind": "percent_of_equity",
+        "fraction": 0.5
+      },
+      "allow_long": true,
+      "allow_short": true
+    },
+    "execution_config": {
+      "taker_fee_bps": 5.0,
+      "maker_fee_bps": 2.0,
+      "spread_bps": 2.5,
+      "slippage_bps": 4.0,
+      "latency_bars": 0,
+      "latency_events": 0,
+      "order_timeout_bars": null,
+      "order_timeout_events": null,
+      "order_type": "market",
+      "market_price_reference": "mid",
+      "limit_fill_assumption": "touch",
+      "use_candle_spread": true,
+      "partial_fill_ratio": null,
+      "liquidation": {
+        "maintenance_margin_ratio": 0.01,
+        "liquidation_fee_bps": 10.0,
+        "use_adverse_price_path": true
+      }
+    }
+  },
+  "validation_config": {
+    "in_sample_ratio": 0.6,
+    "stress_scenarios": [
+      {
+        "name": "higher_costs",
+        "fee_bps_delta": 2.0,
+        "slippage_bps_delta": 3.0,
+        "spread_bps_delta": 1.0,
+        "latency_bars_delta": 0,
+        "latency_events_delta": 0,
+        "funding_multiplier": 1.0
+      },
+      {
+        "name": "latency_and_funding",
+        "fee_bps_delta": 0.0,
+        "slippage_bps_delta": 2.0,
+        "spread_bps_delta": 0.5,
+        "latency_bars_delta": 1,
+        "latency_events_delta": 0,
+        "funding_multiplier": 1.5
+      }
+    ],
+    "parameter_sweeps": [
+      {
+        "name": "fast_window",
+        "values": [
+          { "int": 2 },
+          { "int": 3 },
+          { "int": 4 }
+        ]
+      },
+      {
+        "name": "slow_window",
+        "values": [
+          { "int": 5 },
+          { "int": 6 }
+        ]
+      }
+    ],
+    "walk_forward": {
+      "train_ratio": 0.5,
+      "test_ratio": 0.25,
+      "step_ratio": 0.25,
+      "max_windows": 2
+    },
+    "regime_windows": [
+      {
+        "name": "first_half",
+        "start": "2024-01-01T00:00:00Z",
+        "end": "2024-01-01T09:00:00Z"
+      },
+      {
+        "name": "second_half",
+        "start": "2024-01-01T10:00:00Z",
+        "end": "2024-01-01T19:00:00Z"
+      }
+    ],
+    "deterministic_seed": 11,
+    "min_trades_for_score": 2
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "submitted_orders": 3,
+  "filled_orders": 3,
+  "cancelled_orders": 0,
+  "expired_orders": 0,
+  "rejected_orders": 0,
+  "market_fills": 3,
+  "maker_limit_fills": 0,
+  "taker_limit_fills": 0,
+  "open_legs": 2,
+  "close_legs": 2,
+  "liquidation_legs": 0,
+  "flip_orders": 1,
+  "liquidation_count": 0,
+  "funding_events_applied": 1,
+  "average_fill_delay_steps": 0.6666666666666666,
+  "average_fill_delay_seconds": 2400.0,
+  "total_fee_paid": 0.6087961107372872,
+  "total_spread_cost": 0.12175922214745746,
+  "total_slippage_cost": 0.12175922214745746,
+  "total_funding_cost": -0.03046601941747573,
+  "total_liquidation_fees": 0.0,
+  "reason_counts": {
+    "filled": 2,
+    "position_flip": 1
+  },
+  "notes": []
+}

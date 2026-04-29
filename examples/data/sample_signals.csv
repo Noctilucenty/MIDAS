@@ -1,0 +1,5 @@
+timestamp,action,leverage_override,limit_price,note
+2024-01-01T03:00:00Z,go_long,2.0,,signal_file_entry
+2024-01-01T07:00:00Z,go_short,2.0,,signal_file_flip
+2024-01-01T12:00:00Z,go_long,2.0,,signal_file_reenter
+2024-01-01T18:00:00Z,exit_to_flat,2.0,,signal_file_exit
