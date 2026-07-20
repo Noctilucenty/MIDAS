@@ -1,3 +1,4 @@
+pub mod binary;
 use crate::domain::types::{DrawdownPoint, EquityPoint, MetricsReport, Trade};
 
 pub fn compute_metrics(
