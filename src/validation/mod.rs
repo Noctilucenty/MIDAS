@@ -1,3 +1,4 @@
+pub mod binary_gates;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
