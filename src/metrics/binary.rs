@@ -41,6 +41,9 @@ pub struct BinaryMetricsReport {
     /// over decisive trades that carried a prediction. Lower is better;
     /// 0.25 is the score of always predicting 0.5.
     pub brier_score: Option<f64>,
+    /// Share of decisive trades whose price finished above entry - the class
+    /// prior a constant predictor would use. Baseline Brier = p * (1 - p).
+    pub label_up_rate: Option<f64>,
 }
 
 /// Compute the aggregate report. `opportunities` counts every decision the
@@ -99,6 +102,7 @@ pub fn compute_binary_metrics(
     }
 
     let brier_score = brier(settlements);
+    let label_up_rate = up_rate(settlements);
 
     BinaryMetricsReport {
         opportunities,
@@ -117,7 +121,26 @@ pub fn compute_binary_metrics(
         coverage,
         longest_losing_streak,
         brier_score,
+        label_up_rate,
     }
+}
+
+/// Whether a decisive settlement's price finished above entry.
+fn went_up(s: &BinarySettlement) -> Option<bool> {
+    use crate::domain::binary::BinaryAction;
+    match (s.position.signal.action, s.outcome) {
+        (BinaryAction::BinaryCall, BinaryOutcome::Win) => Some(true),
+        (BinaryAction::BinaryCall, BinaryOutcome::Loss) => Some(false),
+        (BinaryAction::BinaryPut, BinaryOutcome::Win) => Some(false),
+        (BinaryAction::BinaryPut, BinaryOutcome::Loss) => Some(true),
+        _ => None,
+    }
+}
+
+fn up_rate(settlements: &[BinarySettlement]) -> Option<f64> {
+    let labels: Vec<bool> = settlements.iter().filter_map(went_up).collect();
+    (!labels.is_empty())
+        .then(|| labels.iter().filter(|up| **up).count() as f64 / labels.len() as f64)
 }
 
 /// Group settlements by a key and compute per-group reports (e.g. by payout
@@ -146,25 +169,13 @@ fn count(settlements: &[BinarySettlement], outcome: BinaryOutcome) -> usize {
 /// Brier score over decisive trades with predictions. The realized label is
 /// "price finished above entry": a won call or lost put means up.
 fn brier(settlements: &[BinarySettlement]) -> Option<f64> {
-    use crate::domain::binary::BinaryAction;
-
     let mut sum = 0.0f64;
     let mut n = 0usize;
     for s in settlements {
-        let (Some(p_up), true) = (
-            s.position.signal.predicted_prob_up,
-            s.outcome != BinaryOutcome::Tie,
-        ) else {
+        let (Some(p_up), Some(up)) = (s.position.signal.predicted_prob_up, went_up(s)) else {
             continue;
         };
-        let went_up = match (s.position.signal.action, s.outcome) {
-            (BinaryAction::BinaryCall, BinaryOutcome::Win) => true,
-            (BinaryAction::BinaryCall, BinaryOutcome::Loss) => false,
-            (BinaryAction::BinaryPut, BinaryOutcome::Win) => false,
-            (BinaryAction::BinaryPut, BinaryOutcome::Loss) => true,
-            _ => continue,
-        };
-        let label = if went_up { 1.0 } else { 0.0 };
+        let label = if up { 1.0 } else { 0.0 };
         sum += (p_up - label).powi(2);
         n += 1;
     }

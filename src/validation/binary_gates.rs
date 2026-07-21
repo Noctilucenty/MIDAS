@@ -5,20 +5,28 @@
 //! positive stretch near break-even is routinely luck. A model is promotable
 //! only when ALL gates pass:
 //!
-//! 1. Sample size: at least `min_trades` executed out-of-sample trades.
-//! 2. Statistical edge: the Wilson lower confidence bound of the win rate
-//!    must exceed the payout-adjusted break-even rate plus a safety margin.
-//! 3. Positive expectancy: realized EV per trade must be positive.
-//! 4. Drawdown: max drawdown bounded as a fraction of total staked.
-//! 5. Payout stress: gate 2 must still hold after a payout haircut
-//!    (payouts move; an edge that dies at -5 points of payout is not an edge).
+//! 1.  Sample size: at least `min_trades` executed out-of-sample trades.
+//! 2.  Statistical edge: the Wilson lower confidence bound of the win rate
+//!     must exceed the payout-adjusted break-even rate plus a safety margin.
+//! 3.  Payout stress: gate 2 must still hold after a payout haircut.
+//! 4.  Positive expectancy: realized EV per trade must be positive.
+//! 5.  Drawdown: max drawdown bounded as a fraction of a DECLARED starting
+//!     bankroll (never of cumulative stake, which grows with trade count).
+//! 6.  Calibration: Brier score must beat the class-prior constant predictor.
+//! 7.  Fold consistency: enough walk-forward folds, and most of them
+//!     individually non-negative.
+//! 8.  Regime breadth: trades must span at least `min_days` distinct UTC days.
+//! 9.  Payout provenance: results must rest on prospective payout snapshots,
+//!     not assumed payouts.
 //!
 //! These gates cannot be relaxed by any automated process - changing them is
 //! a reviewed code change by design.
 
+use std::collections::BTreeSet;
+
 use serde::{Deserialize, Serialize};
 
-use crate::domain::binary::break_even_win_rate;
+use crate::domain::binary::{break_even_win_rate, BinarySettlement};
 use crate::metrics::binary::BinaryMetricsReport;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -29,10 +37,21 @@ pub struct BinaryPromotionGates {
     pub confidence_z: f64,
     /// Wilson lower bound must exceed break-even by at least this. Default 0.
     pub min_edge_margin: f64,
-    /// Max drawdown allowed, as a fraction of total staked. Default 0.25.
+    /// DECLARED starting bankroll the drawdown cap is measured against.
+    pub starting_bankroll: f64,
+    /// Max drawdown allowed, as a fraction of starting bankroll. Default 0.25.
     pub max_drawdown_fraction: f64,
     /// Payout reduction applied for the stress re-check. Default 0.05.
     pub payout_haircut: f64,
+    /// Minimum walk-forward folds represented in the settlements. Default 3.
+    pub min_folds: usize,
+    /// Share of folds that must have non-negative P&L. Default 0.6.
+    pub min_fold_nonnegative_share: f64,
+    /// Minimum distinct UTC days across trade entries. Default 5.
+    pub min_days: usize,
+    /// Whether payouts came from prospective snapshots (true) or were
+    /// assumed (false). Assumed payouts can never promote.
+    pub payout_source_prospective: bool,
 }
 
 impl Default for BinaryPromotionGates {
@@ -41,8 +60,13 @@ impl Default for BinaryPromotionGates {
             min_trades: 200,
             confidence_z: 1.96,
             min_edge_margin: 0.0,
+            starting_bankroll: 100.0,
             max_drawdown_fraction: 0.25,
             payout_haircut: 0.05,
+            min_folds: 3,
+            min_fold_nonnegative_share: 0.6,
+            min_days: 5,
+            payout_source_prospective: false,
         }
     }
 }
@@ -74,8 +98,20 @@ pub fn wilson_lower_bound(successes: usize, trials: usize, z: f64) -> f64 {
     ((center - spread) / denominator).max(0.0)
 }
 
+/// Extract the fold tag from a settlement's signal note ("fold=N").
+fn fold_of(settlement: &BinarySettlement) -> Option<String> {
+    settlement
+        .position
+        .signal
+        .note
+        .as_deref()
+        .and_then(|note| note.split(',').find(|part| part.trim().starts_with("fold=")))
+        .map(|part| part.trim().to_string())
+}
+
 pub fn evaluate_promotion(
     report: &BinaryMetricsReport,
+    settlements: &[BinarySettlement],
     gates: &BinaryPromotionGates,
 ) -> PromotionVerdict {
     let mut checks = Vec::new();
@@ -130,17 +166,80 @@ pub fn evaluate_promotion(
         format!("ev_per_trade {:?}", report.ev_per_trade),
     );
 
-    let drawdown_cap = gates.max_drawdown_fraction * report.total_staked;
+    let drawdown_cap = gates.max_drawdown_fraction * gates.starting_bankroll;
     check(
         "drawdown",
-        report.total_staked > 0.0 && report.max_drawdown <= drawdown_cap,
+        gates.starting_bankroll > 0.0 && report.max_drawdown <= drawdown_cap,
         format!(
-            "max drawdown {:.2} vs cap {:.2} ({:.0}% of {:.2} staked)",
+            "max drawdown {:.2} vs cap {:.2} ({:.0}% of declared {:.2} bankroll)",
             report.max_drawdown,
             drawdown_cap,
             gates.max_drawdown_fraction * 100.0,
-            report.total_staked
+            gates.starting_bankroll
         ),
+    );
+
+    match (report.brier_score, report.label_up_rate) {
+        (Some(brier), Some(prior)) => {
+            let baseline = prior * (1.0 - prior);
+            check(
+                "calibration_vs_prior",
+                brier < baseline,
+                format!(
+                    "brier {:.4} vs class-prior baseline {:.4} (up rate {:.3})",
+                    brier, baseline, prior
+                ),
+            );
+        }
+        _ => check(
+            "calibration_vs_prior",
+            false,
+            "missing predictions or no decisive trades".to_string(),
+        ),
+    }
+
+    let mut fold_pnl: std::collections::BTreeMap<String, f64> = Default::default();
+    for settlement in settlements {
+        if let Some(fold) = fold_of(settlement) {
+            *fold_pnl.entry(fold).or_insert(0.0) += settlement.pnl;
+        }
+    }
+    let folds = fold_pnl.len();
+    let nonnegative = fold_pnl.values().filter(|pnl| **pnl >= 0.0).count();
+    let share = if folds > 0 {
+        nonnegative as f64 / folds as f64
+    } else {
+        0.0
+    };
+    check(
+        "fold_consistency",
+        folds >= gates.min_folds && share >= gates.min_fold_nonnegative_share,
+        format!(
+            "{folds} folds (need {}), {nonnegative} non-negative ({:.0}% vs {:.0}% required)",
+            gates.min_folds,
+            share * 100.0,
+            gates.min_fold_nonnegative_share * 100.0
+        ),
+    );
+
+    let days: BTreeSet<String> = settlements
+        .iter()
+        .map(|s| s.position.entry_time.format("%Y-%m-%d").to_string())
+        .collect();
+    check(
+        "regime_breadth",
+        days.len() >= gates.min_days,
+        format!("{} distinct UTC days (need {})", days.len(), gates.min_days),
+    );
+
+    check(
+        "payout_provenance",
+        gates.payout_source_prospective,
+        if gates.payout_source_prospective {
+            "prospective payout snapshots".to_string()
+        } else {
+            "ASSUMED payouts - cannot promote".to_string()
+        },
     );
 
     PromotionVerdict {
@@ -152,34 +251,62 @@ pub fn evaluate_promotion(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metrics::binary::BinaryMetricsReport;
+    use crate::domain::binary::{
+        settle, BinaryAction, BinaryPosition, BinarySignal, TieBehavior,
+    };
+    use crate::metrics::binary::compute_binary_metrics;
+    use chrono::{DateTime, Duration, TimeZone, Utc};
 
-    fn report(wins: usize, losses: usize, payout: f64) -> BinaryMetricsReport {
-        let trades = wins + losses;
-        let net = wins as f64 * payout - losses as f64;
-        BinaryMetricsReport {
-            opportunities: trades * 2,
-            trades,
-            wins,
-            losses,
-            ties: 0,
-            win_rate: (trades > 0).then(|| wins as f64 / trades as f64),
-            avg_payout: (trades > 0).then_some(payout),
-            break_even_win_rate: (trades > 0).then(|| break_even_win_rate(payout)),
-            edge_over_break_even: None,
-            total_staked: trades as f64,
-            net_pnl: net,
-            ev_per_trade: (trades > 0).then(|| net / trades as f64),
-            max_drawdown: losses as f64 * 0.05, // mild, spread-out losses
-            coverage: Some(0.5),
-            longest_losing_streak: 3,
-            brier_score: None,
+    fn t(secs: i64) -> DateTime<Utc> {
+        Utc.timestamp_opt(1_700_000_000 + secs, 0).unwrap()
+    }
+
+    /// Build settlements: `wins` then `losses`, interleaved across `folds`
+    /// fold tags and spread across `days` distinct days.
+    fn make_settlements(
+        wins: usize,
+        losses: usize,
+        payout: f64,
+        folds: usize,
+        days: usize,
+    ) -> Vec<BinarySettlement> {
+        let total = wins + losses;
+        (0..total)
+            .map(|i| {
+                // Bresenham-style even interleave of wins and losses, so the
+                // sequence carries no artificial losing streak.
+                let win = (i + 1) * wins / total > i * wins / total;
+                let position = BinaryPosition {
+                    signal: BinarySignal {
+                        timestamp: t(i as i64 * 60),
+                        action: BinaryAction::BinaryCall,
+                        stake: 1.0,
+                        expiry_seconds: 60,
+                        payout,
+                        predicted_prob_up: Some(if win { 0.60 } else { 0.55 }),
+                        model_version: None,
+                        feature_hash: None,
+                        note: Some(format!("fold={}", i % folds.max(1))),
+                    },
+                    entry_time: t(0) + Duration::days((i % days.max(1)) as i64)
+                        + Duration::seconds(i as i64 * 60),
+                    entry_price: 1.0,
+                };
+                settle(&position, if win { 1.1 } else { 0.9 }, TieBehavior::RefundStake).unwrap()
+            })
+            .collect()
+    }
+
+    fn promotable_gates() -> BinaryPromotionGates {
+        BinaryPromotionGates {
+            starting_bankroll: 100.0,
+            payout_source_prospective: true,
+            ..Default::default()
         }
     }
 
     #[test]
     fn wilson_matches_known_value() {
-        // 60/100 at z=1.96 -> ~0.502 (classic textbook value).
         let lb = wilson_lower_bound(60, 100, 1.96);
         assert!((lb - 0.502).abs() < 0.002, "{lb}");
         assert_eq!(wilson_lower_bound(0, 0, 1.96), 0.0);
@@ -187,9 +314,33 @@ mod tests {
     }
 
     #[test]
+    fn strong_large_sample_passes_all_gates() {
+        // 60% over 1000 trades at 0.85, 4 folds, 6 days, prospective payouts.
+        let settlements = make_settlements(600, 400, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 2000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
+        assert!(verdict.promotable, "{:#?}", verdict.checks);
+    }
+
+    #[test]
+    fn assumed_payouts_can_never_promote() {
+        let settlements = make_settlements(600, 400, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 2000);
+        let gates = BinaryPromotionGates {
+            payout_source_prospective: false,
+            ..promotable_gates()
+        };
+        let verdict = evaluate_promotion(&report, &settlements, &gates);
+        assert!(!verdict.promotable);
+        let provenance = verdict.checks.iter().find(|c| c.name == "payout_provenance").unwrap();
+        assert!(!provenance.passed);
+    }
+
+    #[test]
     fn small_profitable_sample_is_rejected() {
-        // 20/30 at 0.85 payout is profitable but statistically nothing.
-        let verdict = evaluate_promotion(&report(20, 10, 0.85), &BinaryPromotionGates::default());
+        let settlements = make_settlements(20, 10, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 60);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
         assert!(!verdict.promotable);
         let sample = verdict.checks.iter().find(|c| c.name == "sample_size").unwrap();
         assert!(!sample.passed);
@@ -197,27 +348,22 @@ mod tests {
 
     #[test]
     fn barely_above_break_even_fails_statistical_gate() {
-        // 56% over 500 trades at 0.85: above break-even (54.05%) but the
-        // Wilson lower bound (~51.6%) is not.
-        let verdict = evaluate_promotion(&report(280, 220, 0.85), &BinaryPromotionGates::default());
-        assert!(!verdict.promotable);
+        // 56% over 500: above break-even but Wilson LB is not.
+        let settlements = make_settlements(280, 220, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 1000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
         let edge = verdict.checks.iter().find(|c| c.name == "statistical_edge").unwrap();
         assert!(!edge.passed);
-    }
-
-    #[test]
-    fn strong_large_sample_passes_all_gates() {
-        // 60% over 1000 trades at 0.85: Wilson LB ~0.5695 > stressed
-        // break-even 1/1.80 = 0.5556.
-        let verdict = evaluate_promotion(&report(600, 400, 0.85), &BinaryPromotionGates::default());
-        assert!(verdict.promotable, "{:?}", verdict.checks);
+        assert!(!verdict.promotable);
     }
 
     #[test]
     fn payout_haircut_kills_marginal_edges() {
-        // 57% over 1500 trades at 0.85: Wilson LB ~0.5448 beats break-even
-        // (0.5405) but not the stressed break-even (0.5556 at payout 0.80).
-        let verdict = evaluate_promotion(&report(855, 645, 0.85), &BinaryPromotionGates::default());
+        // 57% over 1500: Wilson LB ~0.5448 beats break-even (0.5405) but not
+        // the stressed break-even (0.5556 at payout 0.80).
+        let settlements = make_settlements(855, 645, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 3000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
         let edge = verdict.checks.iter().find(|c| c.name == "statistical_edge").unwrap();
         let stress = verdict.checks.iter().find(|c| c.name == "payout_stress").unwrap();
         assert!(edge.passed, "{}", edge.detail);
@@ -226,19 +372,59 @@ mod tests {
     }
 
     #[test]
-    fn deep_drawdown_fails_even_with_edge() {
-        let mut strong = report(600, 400, 0.85);
-        strong.max_drawdown = 0.5 * strong.total_staked;
-        let verdict = evaluate_promotion(&strong, &BinaryPromotionGates::default());
+    fn drawdown_is_measured_against_declared_bankroll() {
+        let settlements = make_settlements(600, 400, 0.85, 4, 6);
+        let report = compute_binary_metrics(&settlements, 2000);
+        // Same trades, tiny declared bankroll (cap 0.5 vs ~1.0 drawdown):
+        // the identical drawdown must now breach.
+        let gates = BinaryPromotionGates {
+            starting_bankroll: 2.0,
+            ..promotable_gates()
+        };
+        let verdict = evaluate_promotion(&report, &settlements, &gates);
         let drawdown = verdict.checks.iter().find(|c| c.name == "drawdown").unwrap();
-        assert!(!drawdown.passed);
-        assert!(!verdict.promotable);
+        assert!(!drawdown.passed, "{}", drawdown.detail);
+    }
+
+    #[test]
+    fn too_few_days_fails_regime_breadth() {
+        let settlements = make_settlements(600, 400, 0.85, 4, 2);
+        let report = compute_binary_metrics(&settlements, 2000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
+        let breadth = verdict.checks.iter().find(|c| c.name == "regime_breadth").unwrap();
+        assert!(!breadth.passed);
+    }
+
+    #[test]
+    fn too_few_folds_fails_consistency() {
+        let settlements = make_settlements(600, 400, 0.85, 1, 6);
+        let report = compute_binary_metrics(&settlements, 2000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
+        let folds = verdict.checks.iter().find(|c| c.name == "fold_consistency").unwrap();
+        assert!(!folds.passed);
+    }
+
+    #[test]
+    fn poor_calibration_fails_against_prior_baseline() {
+        // Wins predicted at 0.55, losses at 0.60: inverted, worse than prior.
+        let mut settlements = make_settlements(600, 400, 0.85, 4, 6);
+        for s in &mut settlements {
+            s.position.signal.predicted_prob_up = Some(match s.outcome {
+                crate::domain::binary::BinaryOutcome::Win => 0.10,
+                _ => 0.90,
+            });
+        }
+        let report = compute_binary_metrics(&settlements, 2000);
+        let verdict = evaluate_promotion(&report, &settlements, &promotable_gates());
+        let calibration = verdict.checks.iter().find(|c| c.name == "calibration_vs_prior").unwrap();
+        assert!(!calibration.passed, "{}", calibration.detail);
     }
 
     #[test]
     fn empty_report_fails_everything_gracefully() {
-        let verdict = evaluate_promotion(&report(0, 0, 0.85), &BinaryPromotionGates::default());
+        let report = compute_binary_metrics(&[], 0);
+        let verdict = evaluate_promotion(&report, &[], &promotable_gates());
         assert!(!verdict.promotable);
-        assert_eq!(verdict.checks.len(), 5);
+        assert_eq!(verdict.checks.len(), 9);
     }
 }

@@ -29,39 +29,67 @@ struct Output {
     verdict: PromotionVerdict,
 }
 
-fn run() -> Result<String, String> {
-    let args: Vec<String> = std::env::args().skip(1).collect();
-    let positional: Vec<&String> = args.iter().filter(|a| !a.starts_with("--")).collect();
-    if positional.len() != 2 {
-        return Err("usage: binary-backtest <candles.json> <signals.json> [--max-concurrent N] [--full]".to_string());
-    }
+const USAGE: &str = "usage: binary-backtest <candles.json> <signals.json> \
+[--max-concurrent N] [--bankroll AMOUNT] [--payout-prospective] [--full]";
 
+fn run() -> Result<String, String> {
+    // Structural parse: walk the argument list once, consuming each option's
+    // value explicitly so values never leak into the positional list.
+    let mut positional: Vec<String> = Vec::new();
     let mut config = BinaryBacktestConfig::default();
-    if let Some(pos) = args.iter().position(|a| a == "--max-concurrent") {
-        let value = args
-            .get(pos + 1)
-            .ok_or("--max-concurrent needs a value")?
-            .parse::<usize>()
-            .map_err(|e| format!("bad --max-concurrent: {e}"))?;
-        config.max_concurrent = value;
+    let mut gates = BinaryPromotionGates::default();
+    let mut full = false;
+
+    let mut args = std::env::args().skip(1);
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--max-concurrent" => {
+                config.max_concurrent = args
+                    .next()
+                    .ok_or("--max-concurrent needs a value")?
+                    .parse::<usize>()
+                    .map_err(|e| format!("bad --max-concurrent: {e}"))?;
+                if config.max_concurrent < 1 {
+                    return Err("--max-concurrent must be >= 1".to_string());
+                }
+            }
+            "--bankroll" => {
+                gates.starting_bankroll = args
+                    .next()
+                    .ok_or("--bankroll needs a value")?
+                    .parse::<f64>()
+                    .map_err(|e| format!("bad --bankroll: {e}"))?;
+                if gates.starting_bankroll <= 0.0 {
+                    return Err("--bankroll must be positive".to_string());
+                }
+            }
+            "--payout-prospective" => gates.payout_source_prospective = true,
+            "--full" => full = true,
+            other if other.starts_with("--") => {
+                return Err(format!("unknown option {other}\n{USAGE}"));
+            }
+            other => positional.push(other.to_string()),
+        }
     }
-    let full = args.iter().any(|a| a == "--full");
+    if positional.len() != 2 {
+        return Err(USAGE.to_string());
+    }
 
     let candles: Vec<Candle> = serde_json::from_str(
-        &fs::read_to_string(positional[0]).map_err(|e| format!("read candles: {e}"))?,
+        &fs::read_to_string(&positional[0]).map_err(|e| format!("read candles: {e}"))?,
     )
     .map_err(|e| format!("parse candles: {e}"))?;
     let signals: Vec<BinarySignal> = serde_json::from_str(
-        &fs::read_to_string(positional[1]).map_err(|e| format!("read signals: {e}"))?,
+        &fs::read_to_string(&positional[1]).map_err(|e| format!("read signals: {e}"))?,
     )
     .map_err(|e| format!("parse signals: {e}"))?;
 
     let mut report =
         run_binary_backtest(&candles, &signals, &config).map_err(|e| e.to_string())?;
+    let verdict = evaluate_promotion(&report.metrics, &report.settlements, &gates);
     if !full {
         report.settlements.clear();
     }
-    let verdict = evaluate_promotion(&report.metrics, &BinaryPromotionGates::default());
 
     serde_json::to_string_pretty(&Output { report, verdict }).map_err(|e| e.to_string())
 }
